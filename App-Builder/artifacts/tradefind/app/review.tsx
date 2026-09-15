@@ -1,0 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Field, PrimaryButton } from '@/components/TradeFindUI';
+import { useTradeFind } from '@/context/TradeFindContext';
+import { useColors } from '@/hooks/useColors';
+export default function ReviewScreen() {
+  const colors = useColors(); const insets = useSafeAreaInsets(); const { jobId, recipientId } = useLocalSearchParams<{ jobId: string; recipientId: string }>(); const { addReview } = useTradeFind(); const [rating, setRating] = useState(0); const [comment, setComment] = useState('');
+  const submit = async () => { if (!rating) { Alert.alert('Choose a rating', 'Tap the stars to leave a rating.'); return; } await addReview(jobId, recipientId, rating, comment); Alert.alert('Review submitted', 'Thanks for helping keep TradeFind trustworthy.', [{ text: 'Done', onPress: () => router.back() }]); };
+  return <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 }]}><Pressable onPress={() => router.back()}><Ionicons name="close" size={24} color={colors.foreground} /></Pressable><View style={styles.content}><View style={[styles.icon, { backgroundColor: colors.accent }]}><Ionicons name="star" size={27} color={colors.primary} /></View><Text style={[styles.title, { color: colors.foreground }]}>How did it go?</Text><Text style={[styles.body, { color: colors.mutedForeground }]}>Your honest feedback helps the TradeFind community choose with confidence.</Text><View style={styles.stars}>{[1, 2, 3, 4, 5].map((value) => <Pressable key={value} onPress={() => setRating(value)}><Ionicons name={value <= rating ? 'star' : 'star-outline'} size={37} color={colors.amber} /></Pressable>)}</View><Field label="Add a comment (optional)" value={comment} onChangeText={setComment} placeholder="What stood out about the experience?" multiline /><PrimaryButton label="Submit review" icon="checkmark" onPress={submit} /></View></View>;
+}
+const styles = StyleSheet.create({ root: { flex: 1, paddingHorizontal: 22 }, content: { flex: 1, justifyContent: 'center' }, icon: { width: 58, height: 58, borderRadius: 19, alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 18 }, title: { fontFamily: 'Inter_700Bold', fontSize: 29, textAlign: 'center' }, body: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 23, textAlign: 'center', marginTop: 9 }, stars: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 26 } });
